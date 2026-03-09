@@ -1,64 +1,86 @@
-DevOps Assignment
-Overview
+# DevOps Assignment
 
-This project demonstrates a complete DevOps environment deployed on a Kubernetes cluster (Minikube). The environment includes:
+## Overview
 
-Jenkins with dynamic Kubernetes agents
+This project demonstrates a complete DevOps environment deployed on a Kubernetes cluster using **Minikube**. The environment includes:
 
-PostgreSQL for data storage
+- **Jenkins** with dynamic Kubernetes agents
+- **PostgreSQL** for data storage
+- **Grafana** for monitoring
+- **Prometheus** for metrics collection
+- **Traefik** as the ingress controller
 
-Grafana for monitoring
+All components are installed automatically using a single Bash script (`deploy.sh`).
 
-Prometheus for metrics collection
+---
 
-Traefik as the ingress controller
+## Prerequisites
 
-All components are installed automatically using the deploy.sh Bash script.
+Install the following tools before deployment:
 
-Prerequisites
+- Docker
+- Minikube
+- kubectl
+- Helm
+- Terraform
 
-Before deployment, ensure the following tools are installed:
+---
 
-Docker
+## Deployment
 
-Minikube
+### 1. Clone the Repository
 
-kubectl
+```bash
+git clone https://github.com/PrathmeshCICD/devops-assignment-checkmarks.git
+cd devops-assignment-checkmarks
+```
 
-Helm
+### 2. Run the Deployment Script
 
-Terraform
-
-Start Minikube:
-
-minikube start
-Deployment Instructions
-
-Clone the repository:
-
-git clone <your-repository-url>
-cd devops-assignment
-
-Make the deployment script executable and run it:
-
+```bash
 chmod +x deploy.sh
 ./deploy.sh install
+```
 
-Update your /etc/hosts file with Minikube IP:
+### 3. Update /etc/hosts
 
-<MINIKUBE_IP> jenkins.devops.local
-<MINIKUBE_IP> grafana.devops.local
+Get your Minikube IP:
 
-Access services via your browser:
+```bash
+minikube ip
+```
 
-Jenkins: http://jenkins.devops.local
+Add this line to `/etc/hosts` (replace `<MINIKUBE_IP>` with the actual IP):
 
-Grafana: http://grafana.devops.local
+```
+<MINIKUBE_IP>  jenkins.devops.local grafana.devops.local traefik.devops.local
+```
 
-To uninstall the environment:
+Or run this one-liner:
 
+```bash
+sudo sh -c "echo \"$(minikube ip) jenkins.devops.local grafana.devops.local traefik.devops.local\" >> /etc/hosts"
+```
+
+### 4. Access Services
+
+| Service           | URL                            | Credentials       |
+|-------------------|--------------------------------|-------------------|
+| Jenkins           | http://jenkins.devops.local    | admin / (printed by script) |
+| Grafana           | http://grafana.devops.local    | admin / (printed by script) |
+| Traefik Dashboard | http://traefik.devops.local    | -                 |
+
+### 5. Uninstall
+
+```bash
 ./deploy.sh uninstall
-Architecture
+```
+
+---
+
+## Architecture
+
+```
                         +-----------------------+
                         |      User Browser      |
                         |                       |
@@ -67,7 +89,7 @@ Architecture
                         +----------+------------+
                                    |
                           +--------v--------+
-                          |      Traefik     |
+                          |     Traefik     |
                           | Ingress Controller|
                           +--------+--------+
                                    |
@@ -79,122 +101,162 @@ Architecture
      +------+-------+                           +-------+-------+
             |                                           |
             | Creates Dynamic Worker Pods               | Displays Metrics
-            |                                           | from Prometheus
+            |                                           |
      +------v------+                           +-------v-------+
      |  Worker Pod |                           |  Prometheus   |
-     | (Inserts    |                           |               |
-     |  Timestamps)|                           +---------------+
-     +-------------+
+     | (Inserts    |                           +-------+-------+
+     |  Timestamps)|                                   |
+     +------+------+                           +-------v-------+
+            |                                  | PG Exporter   |
+            | INSERT timestamp                 +---------------+
             |
      +------v------+
      | PostgreSQL  |
      |  Database   |
      +-------------+
-Components
+```
 
-Kubernetes Cluster (Minikube) – Hosts all services
+---
 
-Traefik – Ingress controller & load balancer
+## Components
 
-Jenkins – CI/CD automation with dynamic Kubernetes worker pods
+| Component             | Description                                          |
+|-----------------------|------------------------------------------------------|
+| Kubernetes (Minikube) | Hosts all services                                   |
+| Traefik               | Ingress controller and load balancer                 |
+| Jenkins               | CI/CD with dynamic Kubernetes worker pods            |
+| PostgreSQL            | Database storing timestamp records                   |
+| PostgreSQL Exporter   | Exposes DB metrics to Prometheus                     |
+| Prometheus            | Scrapes and stores metrics                           |
+| Grafana               | Visualizes metrics via dashboards                    |
+| Terraform             | Provisions Grafana datasource and dashboard          |
 
-PostgreSQL – Database storing timestamp records
+---
 
-PostgreSQL Exporter – Exposes database metrics to Prometheus
+## Project Structure
 
-Prometheus – Metrics collection
-
-Grafana – Monitoring dashboards
-
-Terraform – Automates Grafana dashboard provisioning
-
-Services Access
-Service	URL	Default Credentials
-Jenkins	http://jenkins.devops.local
-	admin / password
-Grafana	http://grafana.devops.local
-	admin / admin
-Traefik Dashboard	Via LoadBalancer IP	-
-Jenkins Pipeline
-
-Runs every 5 minutes
-
-Creates dynamic Kubernetes worker pods
-
-Worker pods insert timestamps into PostgreSQL
-
-Job definition: jenkins/jobdsl.groovy
-
-Monitoring
-
-PostgreSQL metrics are scraped by Prometheus
-
-Grafana dashboards visualize:
-
-CPU usage
-
-Memory usage
-
-Query throughput
-
-Database connections
-
-Dashboards are automatically provisioned using Terraform (terraform/dashboards)
-
-Project Structure
-devops-assignment
+```
+devops-assignment-checkmarks/
 │
-├── deploy.sh                 # Deployment script
+├── deploy.sh                              # Single-command install / uninstall
 ├── README.md
 │
-├── jenkins
-│   └── Jenkinsfile           # CI/CD pipeline
+├── helm/
+│   ├── grafana-values.yaml
+│   ├── jenkins-values.yaml
+│   ├── postgresql-values.yaml
+│   └── traefik-values.yaml
 │
-├── k8s                       # Kubernetes manifests
-│   ├── grafana-ingress.yaml
-│   ├── jenkins-ingress.yaml
-│   ├── postgres-exporter-deployment.yaml
-│   ├── postgres-exporter-secret.yaml
-│   ├── postgres-exporter-service.yaml
-│   └── postgres-servicemonitor.yaml
+├── jenkins/
+│   ├── Jenkinsfile                        # Pipeline: insert timestamp to PostgreSQL
+│   └── jobdsl.groovy                      # Seed job DSL definition
 │
-└── terraform                  # Grafana dashboards provisioning
-    ├── provider.tf
-    └── dashboards
-        ├── postgres.json
-        └── postgres_dashboard.tf
-Verification
+├── k8s/
+│   ├── ingressroutes.yaml                 # Traefik IngressRoutes for all services
+│   ├── jenkins-rbac.yaml                  # ServiceAccount + ClusterRole for Jenkins
+│   ├── postgres-exporter-deployment.yaml  # PostgreSQL Exporter deployment
+│   ├── postgres-exporter-service.yaml     # Exporter ClusterIP service
+│   └── postgres-servicemonitor.yaml       # Prometheus ServiceMonitor
+│
+└── terraform/
+    ├── provider.tf                        # Grafana Terraform provider
+    ├── variables.tf                       # Input variables
+    └── main.tf                            # Grafana datasource + dashboard
+```
 
-Check pods:
+---
 
-kubectl get pods
+## Jenkins Pipeline
 
-Check services:
+The pipeline (`jenkins/Jenkinsfile`):
 
-kubectl get svc
+1. Runs on a schedule every **5 minutes** (`H/5 * * * *`)
+2. Spins up a **dynamic Kubernetes worker pod** with two containers:
+   - `jnlp` – Jenkins agent
+   - `postgres-client` – runs `psql` commands
+3. Creates the `timestamps` table if it does not exist
+4. Inserts the current timestamp, pod name, job name, and build number
+5. Prints the last 5 records to verify the insert
 
-Check ingress:
+### Verify Pipeline Output
 
-kubectl get ingress
-Uninstall
+```bash
+kubectl get pods -n devops
+```
 
-Remove the environment completely:
+You should see short-lived `kube-worker-*` pods appear every 5 minutes.
 
+---
+
+## Monitoring
+
+PostgreSQL metrics are exposed by the **postgres-exporter** sidecar and scraped by **Prometheus**.
+
+Grafana dashboard (provisioned by Terraform) displays:
+
+- Timestamps recorded in the last 1 hour
+- Timestamps inserted over time (time series)
+- Database size (MB)
+- Active DB connections
+- Total timestamp records
+- Cache hit ratio (%)
+- DB throughput (commits and rollbacks)
+
+---
+
+## Secrets Management
+
+Secrets are **never stored in Git**. The `deploy.sh` script creates them at deploy time:
+
+```bash
+# PostgreSQL password
+kubectl create secret generic postgres-secret \
+  --from-literal=postgres-password=DevOps2026!
+
+# PostgreSQL Exporter DSN
+kubectl create secret generic postgres-exporter-secret \
+  --from-literal=DATA_SOURCE_NAME="postgres://postgres:DevOps2026!@postgres-postgresql.devops.svc.cluster.local:5432/devops?sslmode=disable"
+```
+
+---
+
+## Verification
+
+```bash
+# Check all pods are running
+kubectl get pods -n devops
+
+# Check services
+kubectl get svc -n devops
+
+# Check ingress routes
+kubectl get ingressroute -n devops
+
+# Check Prometheus targets
+kubectl port-forward svc/prometheus-server 9090:80 -n devops
+# Then open http://localhost:9090/targets
+```
+
+---
+
+## Uninstall
+
+```bash
 ./deploy.sh uninstall
-Technologies Used
+```
 
-Kubernetes (Minikube)
+This removes all Helm releases, Kubernetes namespaces, secrets, and the Minikube cluster.
 
-Jenkins
+---
 
-PostgreSQL
+## Technologies Used
 
-Grafana
-
-Traefik
-
-Terraform
-
-Helm
-
-Bash
+- Kubernetes (Minikube)
+- Jenkins
+- PostgreSQL 15
+- Grafana
+- Prometheus
+- Traefik
+- Terraform
+- Helm
+- Bash
