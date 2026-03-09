@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: postgres-exporter
+  namespace: devops
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: postgres-exporter
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: "9187"
+      interval: 15s
+      path: /metrics

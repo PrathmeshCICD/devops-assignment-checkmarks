@@ -1,0 +1,88 @@
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# IDE / Editor settings
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# Swap / temp files
+# -------------------------
+*.swp
+*.swo
+*~
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
+.env.*
+*.env
+
+# -------------------------
+# Terraform
+# -------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+terraform.tfvars
+terraform.tfvars.json
+*.tfplan
+
+# -------------------------
+# Kubernetes
+# -------------------------
+kubeconfig
+*.kubeconfig
+
+# -------------------------
+# Docker
+# -------------------------
+*.tar
+docker-images/
+*.img
+
+# -------------------------
+# Build / cache files
+# -------------------------
+node_modules/
+dist/
+build/
+target/
+
+# -------------------------
+# Jenkins
+# -------------------------
+jenkins_home/
+*.backup
+
+# -------------------------
+# Secrets / keys
+# -------------------------
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# -------------------------
+# Misc
+# -------------------------
+coverage/
+tmp/
+.cache/
+postgres.tar
+postgres.tar

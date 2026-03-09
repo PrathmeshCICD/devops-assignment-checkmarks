@@ -1,0 +1,20 @@
+controller:
+  admin:
+    username: admin
+    password: drow
+  serviceType: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - jenkins.devops.local
+    annotations:
+      kubernetes.io/ingress.class: traefik
+  imagePullPolicy: IfNotPresent
+persistence:
+  enabled: true
+  size: 1Gi
+agent:
+  enabled: true
+  namespace: devops
+  workingDir: "/home/jenkins/agent"

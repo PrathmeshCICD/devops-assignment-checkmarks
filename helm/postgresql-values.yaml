@@ -1,0 +1,28 @@
+global:
+  postgresql:
+    postgresqlPassword: drow
+
+image:
+  registry: docker.io
+  repository: postgres
+  tag: "13"
+  pullPolicy: IfNotPresent
+
+primary:
+  persistence:
+    enabled: false
+
+extraEnvVars:
+  - name: POSTGRES_PASSWORD
+    value: "drow"
+
+extraVolumes:
+  - name: run-postgresql
+    emptyDir: {}
+
+extraVolumeMounts:
+  - name: run-postgresql
+    mountPath: /var/run/postgresql
+
+metrics:
+  enabled: false

@@ -1,0 +1,37 @@
+pipeline {
+  agent {
+    kubernetes {
+      label 'kubectl-runner'
+      defaultContainer 'kubectl'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command:
+    - cat
+    tty: true
+"""
+    }
+  }
+
+  triggers {
+    cron('H/5 * * * *')
+  }
+
+  stages {
+    stage('Insert Timestamp') {
+      steps {
+        container('kubectl') {
+          sh '''
+          kubectl exec -n devops postgres-postgresql-0 -- \
+          psql -U postgres -d devops \
+          -c "INSERT INTO logs(timestamp) VALUES (NOW());"
+          '''
+        }
+      }
+    }
+  }
+}
