@@ -1,88 +1,18 @@
-# -------------------------
-# OS files
-# -------------------------
-.DS_Store
-Thumbs.db
+# .gitignore
 
-# -------------------------
-# IDE / Editor settings
-# -------------------------
-.vscode/
-.idea/
+# Terraform — never commit state or lock files with secrets
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+terraform/override.tf
 
-# -------------------------
-# Swap / temp files
-# -------------------------
-*.swp
-*.swo
-*~
-
-# -------------------------
-# Logs
-# -------------------------
-*.log
-
-# -------------------------
-# Environment variables
-# -------------------------
-.env
-.env.*
+# Never commit real secret values
 *.env
+.env*
 
-# -------------------------
-# Terraform
-# -------------------------
-.terraform/
-*.tfstate
-*.tfstate.*
-crash.log
-override.tf
-override.tf.json
-terraform.tfvars
-terraform.tfvars.json
-*.tfplan
-
-# -------------------------
-# Kubernetes
-# -------------------------
-kubeconfig
-*.kubeconfig
-
-# -------------------------
-# Docker
-# -------------------------
-*.tar
-docker-images/
-*.img
-
-# -------------------------
-# Build / cache files
-# -------------------------
-node_modules/
-dist/
-build/
-target/
-
-# -------------------------
-# Jenkins
-# -------------------------
-jenkins_home/
-*.backup
-
-# -------------------------
-# Secrets / keys
-# -------------------------
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-
-# -------------------------
-# Misc
-# -------------------------
-coverage/
-tmp/
-.cache/
-postgres.tar
-postgres.tar
+# OS
+.DS_Store
+*.swp
+*~

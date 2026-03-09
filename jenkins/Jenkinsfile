@@ -1,19 +1,46 @@
+// jenkins/Jenkinsfile
+// FIX: Worker pod connects directly to PostgreSQL via service DNS
+// (was using fragile kubectl exec into the postgres pod)
+
 pipeline {
   agent {
     kubernetes {
-      label 'kubectl-runner'
-      defaultContainer 'kubectl'
+      label 'kube-worker'
       yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: kubectl
-    image: bitnami/kubectl:latest
-    command:
-    - cat
-    tty: true
-"""
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          labels:
+            app: jenkins-worker
+        spec:
+          containers:
+          - name: jnlp
+            image: jenkins/inbound-agent:latest
+            resources:
+              requests:
+                cpu: "200m"
+                memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
+          - name: postgres-client
+            image: postgres:15-alpine
+            command: ["sleep"]
+            args: ["infinity"]
+            env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "128Mi"
+              limits:
+                cpu: "200m"
+                memory: "256Mi"
+      """
     }
   }
 
@@ -21,17 +48,68 @@ spec:
     cron('H/5 * * * *')
   }
 
+  environment {
+    // ✅ FIXED: connect via K8s service DNS, not kubectl exec
+    PG_HOST = "postgres-postgresql.devops.svc.cluster.local"
+    PG_USER = "postgres"
+    PG_DB   = "devops"
+  }
+
   stages {
-    stage('Insert Timestamp') {
+    stage('Init Table') {
       steps {
-        container('kubectl') {
-          sh '''
-          kubectl exec -n devops postgres-postgresql-0 -- \
-          psql -U postgres -d devops \
-          -c "INSERT INTO logs(timestamp) VALUES (NOW());"
-          '''
+        container('postgres-client') {
+          sh """
+            echo "Creating timestamps table if not exists..."
+            psql -h ${PG_HOST} -U ${PG_USER} -d ${PG_DB} -c "
+              CREATE TABLE IF NOT EXISTS timestamps (
+                id         SERIAL PRIMARY KEY,
+                timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                pod_name   TEXT,
+                job_name   TEXT,
+                build_num  INTEGER
+              );
+            "
+            echo "Table ready."
+          """
         }
       }
     }
+
+    stage('Record Timestamp') {
+      steps {
+        container('postgres-client') {
+          sh """
+            echo "Inserting timestamp..."
+            psql -h ${PG_HOST} -U ${PG_USER} -d ${PG_DB} -c "
+              INSERT INTO timestamps (timestamp, pod_name, job_name, build_num)
+              VALUES (NOW(), '${NODE_NAME}', '${JOB_NAME}', ${BUILD_NUMBER});
+            "
+            echo "Timestamp recorded: \$(date -u)"
+          """
+        }
+      }
+    }
+
+    stage('Verify') {
+      steps {
+        container('postgres-client') {
+          sh """
+            echo "Last 5 records:"
+            psql -h ${PG_HOST} -U ${PG_USER} -d ${PG_DB} -c "
+              SELECT id, timestamp, pod_name, job_name, build_num
+              FROM timestamps
+              ORDER BY timestamp DESC
+              LIMIT 5;
+            "
+          """
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo "✅ Timestamp successfully recorded to PostgreSQL." }
+    failure { echo "❌ Failed to record timestamp. Check DB connection and secret." }
   }
 }

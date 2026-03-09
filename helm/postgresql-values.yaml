@@ -1,28 +1,28 @@
-global:
-  postgresql:
-    postgresqlPassword: drow
+auth:
+  existingSecret: postgres-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+  username: postgres
+  database: devops
 
 image:
   registry: docker.io
-  repository: postgres
-  tag: "13"
+  repository: bitnami/postgresql
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 primary:
   persistence:
-    enabled: false
-
-extraEnvVars:
-  - name: POSTGRES_PASSWORD
-    value: "drow"
-
-extraVolumes:
-  - name: run-postgresql
-    emptyDir: {}
-
-extraVolumeMounts:
-  - name: run-postgresql
-    mountPath: /var/run/postgresql
+    enabled: true
+    size: 2Gi
+    storageClass: "standard"
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
 
 metrics:
   enabled: false
