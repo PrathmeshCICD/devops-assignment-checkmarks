@@ -78,8 +78,8 @@ The solution contains the following components:
 ---
 
 ## Services Access
-- **Jenkins**: http://jenkins.devops.local (admin/drow)
-- **Grafana**: http://grafana.devops.local (admin/drow)
+- **Jenkins**: http://jenkins.devops.local (admin/password)
+- **Grafana**: http://grafana.devops.local (admin/password)
 - **Traefik Dashboard**: Accessible via LoadBalancer IP
 
 ## Jenkins DSL Job
@@ -211,15 +211,15 @@ Example output:
 Add the following entries to your `/etc/hosts` file using your Minikube IP:
 
 ```
-<MINIKUBE_IP> jenkins.local
-<MINIKUBE_IP> grafana.local
+<MINIKUBE_IP external > jenkins.devops.local
+<MINIKUBE_IP external > grafana.devops.local
 ```
 
 Example:
 
 ```
-192.168.X.X jenkins.local
-192.168.X.X grafana.local
+192.168.X.X jenkins.devops local
+192.168.X.X grafana.devops local
 ```
 
 ---
@@ -229,13 +229,13 @@ Example:
 Jenkins
 
 ```
-http://jenkins.local
+http://jenkins.devops.local
 ```
 
 Grafana
 
 ```
-http://grafana.local
+http://grafana.devops.local
 ```
 
 Default Grafana login:
