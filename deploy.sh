@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================
-#  CxDevOps – Full Stack Installer (Minikube / Linux)
+# 
 #  Usage:  ./deploy.sh install
 #          ./deploy.sh uninstall
 # =============================================================
