@@ -1,13 +1,11 @@
-# Terraform state files (contain sensitive data)
+# Terraform - contains sensitive runtime data
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/.terraform/
 terraform/.terraform.lock.hcl
 
-# Temp files
+# Temp/runtime files
 /tmp/
 *.log
 *.pid
-
-# OS
-.DS_Store
+.env

@@ -1,4 +1,5 @@
 controller:
+  # HA mode - 2 replicas with pod disruption budget
   replicaCount: 2
 
   admin:
@@ -15,10 +16,20 @@ controller:
     - job-dsl:latest
     - credentials-binding:latest
     - pipeline-stage-view:latest
+    - antisamy-markup-formatter:latest
 
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
+
+  # Resource limits for HA stability
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "2000m"
+      memory: "2048Mi"
 
   JCasC:
     defaultConfig: true
@@ -53,10 +64,6 @@ controller:
                         command: "sleep"
                         args: "infinity"
                         ttyEnabled: true
-                        envVars:
-                          - envVar:
-                              key: "PGPASSWORD"
-                              value: "CxDevOps2026!"
                         resourceRequestCpu: "100m"
                         resourceRequestMemory: "128Mi"
 
