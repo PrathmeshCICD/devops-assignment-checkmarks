@@ -1,4 +1,4 @@
-// jenkins/jobdsl.groovy
+jenkins/jobdsl.groovy
 // Seed job DSL - creates the timestamp-recorder pipeline
 
 pipelineJob('timestamp-recorder') {

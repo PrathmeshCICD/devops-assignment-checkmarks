@@ -1,18 +1,13 @@
-# .gitignore
-
-# Terraform — never commit state or lock files with secrets
-terraform/.terraform/
-terraform/.terraform.lock.hcl
+# Terraform state files (contain sensitive data)
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
-terraform/*.tfvars
-terraform/override.tf
+terraform/.terraform/
+terraform/.terraform.lock.hcl
 
-# Never commit real secret values
-*.env
-.env*
+# Temp files
+/tmp/
+*.log
+*.pid
 
 # OS
 .DS_Store
-*.swp
-*~

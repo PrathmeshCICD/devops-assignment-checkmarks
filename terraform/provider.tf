@@ -8,6 +8,6 @@ terraform {
 }
 
 provider "grafana" {
-  url  = "http://grafana.devops.local"
-  auth = "admin:drow"
+  url  = var.grafana_url
+  auth = "admin:${var.grafana_password}"
 }

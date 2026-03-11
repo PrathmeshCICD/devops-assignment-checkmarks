@@ -1,8 +1,26 @@
 service:
   type: LoadBalancer
+
 ports:
+  traefik:
+    port: 8080
+    expose:
+      default: true
+  web:
+    port: 80
   websecure:
     port: 443
+
+deployment:
+  healthchecksPort: 8080
+  healthchecksScheme: HTTP
+
 ingressRoute:
   dashboard:
+    enabled: true
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
     enabled: true
