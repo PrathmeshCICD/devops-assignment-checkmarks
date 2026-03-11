@@ -245,3 +245,28 @@ Removes: all Helm releases, namespaces, secrets, `/etc/hosts` entries, Minikube 
 - Terraform (Grafana provider ~1.39)
 - Helm 3
 - Bash
+
+---
+
+## ⏱️ Installation Time Estimates
+
+The `./deploy.sh install` command runs fully automatically but each component takes time to pull images and start. **Do not interrupt the script.**
+
+| Step | Component | Typical Wait |
+|---|---|---|
+| Step 1 | Minikube start | 2–4 min |
+| Step 5 | Traefik | 1–3 min (image cached after first run) |
+| Step 6 | Minikube tunnel + hosts | 30 sec (enter sudo password when prompted) |
+| Step 7 | PostgreSQL | 2–4 min |
+| Step 9 | Jenkins | 5–10 min (large image, HA mode) |
+| Step 10 | Prometheus | 2–4 min |
+| Step 11 | Grafana | 2–3 min |
+| Step 14 | Terraform | 30 sec (requires Grafana to be reachable) |
+| Step 15–18 | Jenkins pipeline + first run | 2–3 min |
+| **Total** | **Full fresh install** | **~25–40 min** |
+
+> ⚠️ **Jenkins takes the longest** (~5–10 min) because it pulls a large image and starts 2 replicas (HA mode).
+
+> ⚠️ **Keep `minikube tunnel` running** in a separate terminal if the script fails to start it automatically. The tunnel is required for all services to be accessible via Traefik ingress.
+
+> ℹ️ On **second run** (images already cached), total time drops to ~10–15 min.
